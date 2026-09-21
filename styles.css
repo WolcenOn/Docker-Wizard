@@ -263,3 +263,423 @@ input.invalid { border-color: rgba(255,116,116,.75); }
   .service-use { grid-column: 2; justify-self: start; }
   .command-line-row { align-items: flex-start; flex-direction: column; }
 }
+
+
+/* Mobile-first hardening */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+.panel,
+.workspace,
+.content-grid,
+.right-rail,
+.main-panel,
+#step-content,
+.preview-layout,
+.code-card,
+.explain-panel,
+.command-main {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    padding: 18px;
+  }
+
+  .brand {
+    margin-bottom: 14px;
+  }
+
+  .learning-banner {
+    margin-bottom: 14px;
+  }
+
+  .steps {
+    gap: 8px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .step-item {
+    min-width: 0;
+    padding: 9px 8px;
+    justify-content: center;
+  }
+
+  .step-copy {
+    min-width: 0;
+  }
+
+  .step-copy strong,
+  .step-copy small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .workspace {
+    padding: 22px 18px calc(28px + env(safe-area-inset-bottom));
+  }
+
+  .topbar {
+    margin-bottom: 18px;
+  }
+
+  .content-grid {
+    gap: 16px;
+  }
+
+  .right-rail {
+    gap: 14px;
+  }
+
+  .panel {
+    border-radius: 16px;
+  }
+
+  .main-panel {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar {
+    padding: 14px 14px 12px;
+  }
+
+  .brand {
+    gap: 10px;
+  }
+
+  .brand-icon {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 13px;
+    font-size: 21px;
+  }
+
+  .brand h1 {
+    font-size: 16px;
+  }
+
+  .brand p {
+    font-size: 11px;
+  }
+
+  .learning-banner {
+    padding: 11px 12px;
+  }
+
+  .learning-banner small {
+    font-size: 10px;
+  }
+
+  .steps {
+    gap: 6px;
+  }
+
+  .step-item {
+    min-height: 48px;
+    padding: 6px;
+    border-radius: 12px;
+  }
+
+  .step-index {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+  }
+
+  .step-copy {
+    display: none;
+  }
+
+  .workspace {
+    padding: 18px 12px calc(24px + env(safe-area-inset-bottom));
+  }
+
+  .topbar {
+    gap: 14px;
+  }
+
+  .topbar > div:first-child {
+    min-width: 0;
+  }
+
+  .topbar h2 {
+    font-size: clamp(24px, 8vw, 31px);
+    line-height: 1.08;
+    margin-top: 5px;
+  }
+
+  .topbar p {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .eyebrow {
+    font-size: 9px;
+    letter-spacing: .13em;
+  }
+
+  .topbar-actions {
+    gap: 8px;
+  }
+
+  .progress-pill,
+  .ghost-btn {
+    min-height: 40px;
+  }
+
+  .main-panel,
+  .summary-panel,
+  .command-panel {
+    padding: 16px;
+  }
+
+  .section-title {
+    font-size: 20px;
+    line-height: 1.2;
+  }
+
+  .section-copy {
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+
+  .guide-strip {
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 10px;
+    padding: 12px;
+    margin-bottom: 18px;
+  }
+
+  .guide-mark {
+    width: 32px;
+    height: 32px;
+  }
+
+  .guide-strip p,
+  .decision-box p,
+  .field-help,
+  .field-error {
+    font-size: 11px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select {
+    min-height: 50px;
+    font-size: 16px;
+  }
+
+  .option-card {
+    padding: 15px;
+  }
+
+  .option-card p {
+    font-size: 12px;
+  }
+
+  .service-card {
+    padding: 14px;
+    gap: 11px;
+  }
+
+  .service-card small {
+    font-size: 11px;
+  }
+
+  .service-use {
+    white-space: normal;
+    line-height: 1.25;
+  }
+
+  .inline-check {
+    min-height: 52px;
+    padding: 10px 12px;
+    align-items: flex-start;
+    font-size: 13px;
+  }
+
+  .summary-heading h3,
+  .command-panel h3 {
+    font-size: 18px;
+  }
+
+  .mini-terminal code {
+    padding: 12px;
+    font-size: 11px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .preview-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-right: -4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .preview-tab {
+    flex: 0 0 auto;
+    min-height: 42px;
+  }
+
+  .code-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .copy-btn {
+    width: 100%;
+  }
+
+  .code-card pre {
+    max-height: 360px;
+    padding: 13px;
+    font-size: 11px;
+    line-height: 1.55;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .download-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .download-btn {
+    width: 100%;
+  }
+
+  .command-step {
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .command-number {
+    width: 28px;
+    height: 28px;
+  }
+
+  .command-line-row {
+    gap: 8px;
+  }
+
+  .small-copy {
+    min-height: 40px;
+    width: 100%;
+  }
+
+  .wizard-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    margin: 24px -16px -16px;
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(15, 23, 38, 0), rgba(15, 23, 38, .96) 28%);
+    gap: 10px;
+  }
+
+  .secondary-btn,
+  .primary-btn {
+    min-height: 50px;
+    flex: 1 1 0;
+    padding-inline: 12px;
+  }
+
+  .right-rail {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 390px) {
+  .workspace {
+    padding-inline: 10px;
+  }
+
+  .sidebar {
+    padding-inline: 10px;
+  }
+
+  .learning-banner {
+    display: none;
+  }
+
+  .topbar-actions {
+    align-items: stretch;
+  }
+
+  .progress-pill,
+  .ghost-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .main-panel,
+  .summary-panel,
+  .command-panel {
+    padding: 14px;
+  }
+
+  .wizard-actions {
+    margin-left: -14px;
+    margin-right: -14px;
+    margin-bottom: -14px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .secondary-btn,
+  .primary-btn {
+    font-size: 13px;
+  }
+
+  .status-badge {
+    max-width: 110px;
+    text-align: center;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .option-card:hover,
+  .explain-item:hover {
+    transform: none;
+    background: inherit;
+  }
+
+  button,
+  .option-card,
+  .service-card {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ghost-btn,
+  .secondary-btn,
+  .primary-btn,
+  .download-btn,
+  .copy-btn,
+  .preview-tab {
+    min-height: 48px;
+  }
+}
