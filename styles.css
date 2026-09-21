@@ -393,22 +393,42 @@ canvas {
   }
 
   .steps {
-    gap: 6px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
   }
 
   .step-item {
-    min-height: 48px;
-    padding: 6px;
+    min-width: 118px;
+    min-height: 52px;
+    padding: 8px 10px;
     border-radius: 12px;
+    justify-content: flex-start;
+    scroll-snap-align: start;
   }
 
   .step-index {
-    width: 32px;
-    height: 32px;
-    flex-basis: 32px;
+    width: 30px;
+    height: 30px;
+    flex-basis: 30px;
   }
 
   .step-copy {
+    display: block;
+    min-width: 0;
+  }
+
+  .step-copy strong {
+    display: block;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .step-copy small {
     display: none;
   }
 
@@ -624,6 +644,14 @@ canvas {
 
   .learning-banner {
     display: none;
+  }
+
+  .step-item {
+    min-width: 108px;
+  }
+
+  .step-copy strong {
+    font-size: 11px;
   }
 
   .topbar-actions {
