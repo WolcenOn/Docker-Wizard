@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Asistente visual para aprender y generar configuraciones Docker." />
+  <title>Docker Wizard Pro</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">🐳</div>
+        <div>
+          <div class="brand-row">
+            <h1>Docker Wizard</h1>
+            <span class="pro-chip">PRO</span>
+          </div>
+          <p>Genera, entiende y ejecuta</p>
+        </div>
+      </div>
+
+      <div class="learning-banner">
+        <span class="learning-icon">◎</span>
+        <div>
+          <strong>Modo guiado</strong>
+          <small>Te explicamos cada decisión mientras construyes.</small>
+        </div>
+      </div>
+
+      <nav id="steps" class="steps" aria-label="Pasos del asistente"></nav>
+
+      <div class="sidebar-footer">
+        <span>Objetivo</span>
+        <strong>De cero a <code>docker compose up</code></strong>
+      </div>
+    </aside>
+
+    <section class="workspace">
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">ASISTENTE DOCKER · PASO A PASO</span>
+          <h2 id="step-title">Nuevo proyecto</h2>
+          <p id="step-description">Configura tu entorno Docker con contexto y recomendaciones.</p>
+        </div>
+        <div class="topbar-actions">
+          <span id="progress-pill" class="progress-pill">Paso 1 de 5</span>
+          <button id="reset-btn" class="ghost-btn" type="button">Reiniciar</button>
+        </div>
+      </header>
+
+      <div class="content-grid">
+        <section class="panel main-panel">
+          <div id="step-content"></div>
+
+          <div class="wizard-actions">
+            <button id="back-btn" class="secondary-btn" type="button">← Anterior</button>
+            <button id="next-btn" class="primary-btn" type="button">Siguiente →</button>
+          </div>
+        </section>
+
+        <aside class="right-rail">
+          <section class="panel summary-panel">
+            <div class="summary-heading">
+              <div>
+                <span class="eyebrow">CONFIGURACIÓN</span>
+                <h3>Tu stack</h3>
+              </div>
+              <span id="status-badge" class="status-badge">Configurando</span>
+            </div>
+
+            <div id="summary" class="summary-list"></div>
+          </section>
+
+          <section class="panel command-panel">
+            <div class="command-panel-head">
+              <div>
+                <span class="eyebrow">PRÓXIMO COMANDO</span>
+                <h3 id="command-title">Validar configuración</h3>
+              </div>
+              <span class="terminal-symbol">›_</span>
+            </div>
+            <div class="mini-terminal">
+              <code id="terminal-command">docker compose config</code>
+            </div>
+            <p id="command-reason" class="command-reason">Comprueba el YAML y muestra la configuración final antes de arrancar contenedores.</p>
+          </section>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
