@@ -393,39 +393,46 @@ canvas {
   }
 
   .steps {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    scroll-snap-type: x proximity;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 5px;
+    width: 100%;
+    overflow: visible;
+    padding-bottom: 0;
   }
 
   .step-item {
-    min-width: 118px;
-    min-height: 52px;
-    padding: 8px 10px;
-    border-radius: 12px;
-    justify-content: flex-start;
-    scroll-snap-align: start;
+    min-width: 0;
+    min-height: 58px;
+    padding: 7px 2px;
+    border-radius: 11px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    text-align: center;
   }
 
   .step-index {
-    width: 30px;
-    height: 30px;
-    flex-basis: 30px;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
   }
 
   .step-copy {
     display: block;
+    width: 100%;
     min-width: 0;
   }
 
   .step-copy strong {
     display: block;
-    font-size: 12px;
-    white-space: nowrap;
+    width: 100%;
+    font-size: 9px;
+    line-height: 1.15;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
   }
 
   .step-copy small {
@@ -647,11 +654,12 @@ canvas {
   }
 
   .step-item {
-    min-width: 108px;
+    min-width: 0;
+    padding-inline: 1px;
   }
 
   .step-copy strong {
-    font-size: 11px;
+    font-size: 8.5px;
   }
 
   .topbar-actions {
