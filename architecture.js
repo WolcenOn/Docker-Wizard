@@ -1,5 +1,7 @@
 // Docker Wizard Pro: arquitectura visual y paso Docker guiado.
 function architectureDiagram() {
+  if (state.appType === "fullstack") return fullStackArchitectureDiagram();
+
   const labels = {
     postgres: ["PostgreSQL", "SQL"],
     mysql: ["MySQL", "SQL"],
@@ -31,6 +33,49 @@ function architectureDiagram() {
         }).join("") : `<div class="arch-empty">La aplicación no tiene dependencias internas adicionales.</div>`}
       </div>
       <p class="architecture-note">${state.services.has("nginx") ? "Nginx y la app comparten la red frontend. La app también entra en backend para hablar con sus dependencias; las bases de datos no quedan expuestas a la red frontend." : "La app publica su puerto directamente al host. Sus dependencias quedan en una red backend explícita."}</p>
+    </section>`;
+}
+
+function fullStackArchitectureDiagram() {
+  const labels = {
+    postgres: ["PostgreSQL", "SQL"],
+    mysql: ["MySQL", "SQL"],
+    redis: ["Redis", "caché"],
+    rabbitmq: ["RabbitMQ", "mensajería"],
+    mongo: ["MongoDB", "documentos"]
+  };
+  const infra = [...state.services].filter(service => service !== "nginx");
+  const frontend = state.frontendFramework === "react" ? "React + Vite" : state.frontendFramework === "vue" ? "Vue + Vite" : "Svelte + Vite";
+  const runtime = state.runtime === "node" ? "Node.js" : state.runtime[0].toUpperCase() + state.runtime.slice(1);
+  const proxy = state.services.has("nginx");
+
+  return `
+    <section class="architecture-card" aria-label="Arquitectura full stack generada">
+      <div class="architecture-head">
+        <div><span class="eyebrow">ARQUITECTURA FULL STACK</span><h4>Frontend y backend como servicios independientes</h4></div>
+        <span class="architecture-badge">${state.services.size + 2} servicios</span>
+      </div>
+      <div class="arch-flow">
+        <div class="arch-node arch-client"><span>Navegador</span><small>cliente HTTP</small></div>
+        <span class="arch-arrow">→</span>
+        ${proxy ? `<div class="arch-node arch-proxy"><span>Nginx</span><small>:80 · entrada</small></div><span class="arch-arrow">→</span>` : ""}
+        <div class="arch-node"><span>${esc(frontend)}</span><small>${proxy ? "frontend:80" : `localhost:${state.frontendPort}`}</small></div>
+      </div>
+      <div class="arch-flow">
+        <div class="arch-node ${proxy ? "arch-proxy" : "arch-client"}"><span>${proxy ? "Nginx /api/" : "Navegador"}</span><small>${proxy ? "proxy API" : "API directa"}</small></div>
+        <span class="arch-arrow">→</span>
+        <div class="arch-node arch-app"><span>${esc(frameworkLabels[state.framework])}</span><small>${esc(runtime)} · :${state.port}</small></div>
+      </div>
+      <div class="arch-connector"><span>red backend</span></div>
+      <div class="arch-services">
+        ${infra.length ? infra.map(service => {
+          const [name, role] = labels[service] || [service, "servicio"];
+          return `<div class="arch-service"><span class="health-dot" aria-hidden="true"></span><div><strong>${esc(name)}</strong><small>${esc(role)} · healthcheck</small></div></div>`;
+        }).join("") : `<div class="arch-empty">El backend no tiene dependencias de datos adicionales.</div>`}
+      </div>
+      <p class="architecture-note">${proxy
+        ? "Nginx sirve el frontend por / y reenvía /api/ al backend. Las bases de datos permanecen únicamente en la red backend."
+        : `El frontend se publica en localhost:${state.frontendPort} y la API en localhost:${state.port}. En este modo el backend debe permitir el origen del frontend mediante CORS.`}</p>
     </section>`;
 }
 
@@ -78,7 +123,9 @@ function renderDockerStep() {
     <h3 class="section-title">Decide cómo expones y construyes la aplicación</h3>
     <p class="section-copy">El puerto publicado conecta tu máquina con el proceso del contenedor. El generador añade además una base operativa más segura para que el resultado sea útil fuera de una demo.</p>
     ${guide("→", "Host → contenedor", state.services.has("nginx")
-      ? `Como has añadido Nginx, el host publica el puerto 80 y Nginx reenvía el tráfico a <code>app:${state.port}</code>. La app no necesita quedar expuesta directamente en el compose base.`
+      ? state.appType === "fullstack"
+        ? `Como has añadido Nginx, el host publica el puerto 80. <code>/</code> se sirve desde el frontend y <code>/api/</code> se reenvía a <code>app:${state.port}</code>.`
+        : `Como has añadido Nginx, el host publica el puerto 80 y Nginx reenvía el tráfico a <code>app:${state.port}</code>. La app no necesita quedar expuesta directamente en el compose base.`
       : `Con <code>"${state.port}:${state.port}"</code>, las peticiones a localhost:${state.port} se redirigen al puerto ${state.port} dentro del contenedor. <code>EXPOSE</code> documenta el puerto; <code>ports</code> es lo que realmente lo publica.`)}
 
     <div class="two-cols">
