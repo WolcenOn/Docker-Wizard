@@ -40,12 +40,29 @@ function explanationsFor(fileName) {
     ["dist / build", "Evita arrastrar artefactos locales que pueden estar desactualizados o ser incompatibles."]
   ];
   const nginx = [
-    ["proxy_pass", "Reenvía las peticiones al servicio app usando el DNS interno de Docker."],
+    ["proxy_pass", state.appType === "fullstack" ? "En Full Stack, / sirve el frontend y /api/ reenvía al backend usando DNS interno de Docker." : "Reenvía las peticiones al servicio app usando el DNS interno de Docker."],
     ["X-Forwarded-*", "Conserva información del protocolo y cliente original para que la aplicación pueda interpretarla."],
     ["server_name _", "Actúa como virtual host por defecto para este scaffold local."]
   ];
   if (fileName === "Dockerfile") return commonDockerfile;
-  if (fileName === "compose.yml") return compose;
+  if (fileName === "Dockerfile.frontend") return [
+    ["deps", "Instala las dependencias del proyecto Vite antes de copiar el código para aprovechar la caché de capas."],
+    ["build", "Node ejecuta npm run build y genera el directorio estático dist/."],
+    ["VITE_API_URL", "Fija durante el build el punto de entrada que usará el navegador para llamar al backend."],
+    ["runtime", "La imagen final contiene Nginx y los archivos estáticos, no Node ni las dependencias de compilación."],
+    ["HEALTHCHECK", "Verifica que el servidor web está respondiendo antes de considerarlo preparado."]
+  ];
+  if (fileName === "PROJECT_LAYOUT.md") return [
+    ["raíz", "El backend permanece en la raíz para conservar compatibilidad con el modo API existente."],
+    ["frontend/", "El proyecto Vite vive separado y tiene su propio package.json y lockfile."],
+    ["VITE_API_URL", "Es el contrato entre el frontend compilado y el punto de entrada de la API."]
+  ];
+  if (fileName === "compose.yml") return state.appType === "fullstack"
+    ? [...compose,
+      ["frontend", "Añade una segunda imagen desplegable para la SPA, conectada solo a la red frontend."],
+      ["frontend/backend", "Dos redes evitan que el contenedor que sirve la web acceda directamente a las bases de datos."]
+    ]
+    : compose;
   if (fileName === "compose.dev.yml") return dev;
   if (fileName === "compose.prod.yml") return prod;
   if (fileName === ".env.example") return env;
@@ -60,7 +77,7 @@ function commandRunbook() {
     ["docker compose -f compose.yml -f compose.dev.yml config", "Comprueba cómo queda la configuración al combinar el archivo base con el overlay de desarrollo.", ""],
     ["docker compose -f compose.yml -f compose.dev.yml up --build -d", "Construye y arranca el entorno de desarrollo en segundo plano.", ""],
     ["docker compose ps", "Muestra estado y health de los servicios. Un servicio unhealthy merece revisión antes de mirar la app.", ""],
-    ["docker compose logs -f app", "Sigue los logs de la aplicación; es el primer diagnóstico cuando el proceso no arranca o pierde una dependencia.", ""],
+    [state.appType === "fullstack" ? "docker compose logs -f frontend app" : "docker compose logs -f app", state.appType === "fullstack" ? "Sigue frontend y backend a la vez para distinguir un fallo de servidor web, build o API." : "Sigue los logs de la aplicación; es el primer diagnóstico cuando el proceso no arranca o pierde una dependencia.", ""],
     ["docker compose -f compose.yml -f compose.prod.yml config", "Valida el overlay production-like y falla si faltan secretos marcados como obligatorios.", "warning"],
     ["docker compose down", "Detiene y elimina contenedores y redes del proyecto, pero conserva por defecto los volúmenes nombrados.", "warning"],
     ["docker compose down -v", "También elimina los volúmenes. Puede borrar datos persistentes de tus bases de datos.", "danger"]
