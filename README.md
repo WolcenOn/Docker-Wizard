@@ -156,11 +156,32 @@ La aplicación comparte la red `frontend` con Nginx y la red `backend` con sus d
 ├── compose-pro.js
 ├── explanations-pro.js
 ├── generate-pro.js
+├── tests/
+│   └── compose-smoke.js
+├── .github/workflows/
+│   └── smoke.yml
 ├── README.md
 └── LICENSE
 ```
 
 Los módulos `*-pro.js` amplían la versión base sin convertir `app.js` en un archivo monolítico.
+
+## Validación automática
+
+El repositorio incluye tests de humo sin dependencias externas. Comprueban que:
+
+- El modo API no añada servicios ni variables de frontend.
+- Full Stack con Nginx genere frontend, proxy `/api/`, healthcheck y reinicio production-like.
+- Full Stack sin Nginx publique correctamente los puertos del frontend y del backend.
+- Ninguna plantilla produzca valores `undefined`.
+
+Puedes ejecutarlos localmente con:
+
+```bash
+node tests/compose-smoke.js
+```
+
+GitHub Actions ejecuta además `node --check` sobre los módulos principales en cada pull request.
 
 ## GitHub Pages
 
