@@ -1,0 +1,163 @@
+/* Docker Wizard Pro enhancements */
+.architecture-card {
+  margin: 22px 0;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(8, 13, 22, .34), rgba(8, 13, 22, .18));
+}
+.architecture-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.architecture-head h4 { margin: 5px 0 0; font-size: 15px; }
+.architecture-badge {
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 10px;
+}
+.arch-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 0 14px;
+}
+.arch-node {
+  min-width: 118px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--panel-3);
+  text-align: center;
+}
+.arch-node span { display: block; font-size: 12px; font-weight: 800; }
+.arch-node small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+.arch-app { border-color: rgba(79, 140, 255, .52); background: rgba(79, 140, 255, .07); }
+.arch-proxy { border-color: rgba(246, 189, 96, .35); }
+.arch-arrow { color: var(--muted-2); font-weight: 900; }
+.arch-connector {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 12px;
+  min-height: 34px;
+}
+.arch-connector::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 11px;
+  width: 1px;
+  background: var(--border);
+}
+.arch-connector span {
+  align-self: end;
+  position: relative;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--muted-2);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.arch-services {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 9px;
+}
+.arch-service {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: rgba(255,255,255,.018);
+}
+.arch-service strong { display: block; font-size: 11px; }
+.arch-service small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
+.health-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 4px rgba(66,211,132,.09);
+}
+.arch-empty { grid-column: 1 / -1; color: var(--muted); font-size: 11px; text-align: center; padding: 12px; }
+.architecture-note { margin: 14px 0 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
+.professional-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+.professional-card {
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255,255,255,.015);
+}
+.professional-icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  margin-bottom: 10px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  color: var(--accent-2);
+  font-size: 12px;
+  font-weight: 900;
+}
+.professional-card strong { display: block; font-size: 12px; }
+.professional-card p { margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.environment-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+.environment-strip > div {
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: rgba(255,255,255,.015);
+}
+.environment-strip strong { display: block; margin: 7px 0 4px; font-size: 11px; overflow-wrap: anywhere; }
+.environment-strip small { display: block; color: var(--muted); font-size: 10px; line-height: 1.45; }
+.environment-label {
+  display: inline-flex;
+  padding: 3px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(79,140,255,.25);
+  background: var(--accent-bg);
+  color: var(--accent-2);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+.environment-label.prod {
+  color: #a9efc8;
+  background: var(--success-bg);
+  border-color: rgba(66,211,132,.24);
+}
+@media (max-width: 700px) {
+  .professional-grid,
+  .environment-strip { grid-template-columns: 1fr; }
+  .architecture-card { padding: 14px; }
+  .architecture-head { flex-direction: column; }
+  .arch-flow { gap: 7px; }
+  .arch-node { min-width: 96px; padding: 10px; }
+  .arch-arrow { font-size: 12px; }
+  .arch-services { grid-template-columns: 1fr; }
+}
