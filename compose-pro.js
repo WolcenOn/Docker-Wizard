@@ -107,7 +107,97 @@ ${health.mongo}
   return blocks[service];
 }
 
+function frontendDockerfileTemplate() {
+  return `FROM node:22-alpine AS deps
+WORKDIR /frontend
+COPY frontend/package*.json ./
+RUN npm ci
+
+FROM deps AS build
+COPY frontend/ ./
+ARG VITE_API_URL=/api
+ENV VITE_API_URL=$VITE_API_URL
+RUN npm run build
+
+FROM nginx:1.27-alpine AS runtime
+COPY --from=build /frontend/dist /usr/share/nginx/html
+EXPOSE 80
+HEALTHCHECK --interval=10s --timeout=3s --retries=5 CMD wget -q -O /dev/null http://127.0.0.1/ || exit 1
+CMD ["nginx", "-g", "daemon off;"]
+`;
+}
+
+function fullStackNginxBlock() {
+  return `  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      frontend:
+        condition: service_healthy
+      app:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "nginx -t || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - frontend`;
+}
+
+function fullStackComposeTemplate() {
+  const services = [...state.services];
+  const infra = services.filter(service => service !== "nginx");
+  const depends = infra.length
+    ? `\n    depends_on:\n${infra.map(service => `      ${service}:\n        condition: service_healthy`).join("\n")}`
+    : "";
+  const appExposure = state.services.has("nginx")
+    ? `    expose:\n      - "${state.port}"`
+    : `    ports:\n      - "${state.port}:${state.port}"`;
+  const frontendExposure = state.services.has("nginx")
+    ? `    expose:\n      - "80"`
+    : `    ports:\n      - "${state.frontendPort}:80"`;
+  const frontendApi = state.services.has("nginx") ? "/api" : `http://localhost:${state.port}`;
+  const blocks = infra.map(serviceBlock).join("\n\n");
+  const proxy = state.services.has("nginx") ? `\n\n${fullStackNginxBlock()}` : "";
+  const volumes = infra.filter(service => ["postgres", "mysql", "mongo"].includes(service));
+
+  return `services:
+  app:
+    build:
+      context: .
+${appExposure}
+    env_file:
+      - .env
+    environment:
+      APP_ENV: \${APP_ENV:-development}${depends}
+    networks:
+      - frontend
+      - backend
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_URL: "\${FRONTEND_API_URL:-${frontendApi}}"
+${frontendExposure}
+    networks:
+      - frontend${blocks ? `\n\n${blocks}` : ""}${proxy}${volumes.length ? `\n\nvolumes:\n${volumes.map(v => `  ${v}_data:`).join("\n")}` : ""}
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge`;
+}
+
 function composeTemplate() {
+  if (state.appType === "fullstack") return fullStackComposeTemplate();
+
   const services = [...state.services];
   const dependencies = services.filter(service => service !== "nginx");
   const depends = dependencies.length
@@ -149,10 +239,17 @@ function productionOverrides(service) {
 
 function composeProdTemplate() {
   const extras = [...state.services].map(productionOverrides).filter(Boolean);
-  return `services:\n  app:\n    restart: unless-stopped\n    environment:\n      APP_ENV: production${extras.length ? `\n${extras.join("\n")}` : ""}\n`;
+  const frontend = state.appType === "fullstack"
+    ? `\n  frontend:\n    restart: unless-stopped`
+    : "";
+  return `services:\n  app:\n    restart: unless-stopped\n    environment:\n      APP_ENV: production${frontend}${extras.length ? `\n${extras.join("\n")}` : ""}\n`;
 }
 
 function nginxConfigTemplate() {
+  if (state.appType === "fullstack") {
+    return `server {\n    listen 80;\n    server_name _;\n\n    location /api/ {\n        proxy_pass http://app:${state.port}/;\n        proxy_http_version 1.1;\n        proxy_set_header Host $host;\n        proxy_set_header X-Real-IP $remote_addr;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto $scheme;\n    }\n\n    location / {\n        proxy_pass http://frontend:80;\n        proxy_http_version 1.1;\n        proxy_set_header Host $host;\n        proxy_set_header X-Real-IP $remote_addr;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto $scheme;\n    }\n}\n`;
+  }
+
   return `server {\n    listen 80;\n    server_name _;\n\n    location / {\n        proxy_pass http://app:${state.port};\n        proxy_http_version 1.1;\n        proxy_set_header Host $host;\n        proxy_set_header X-Real-IP $remote_addr;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto $scheme;\n    }\n}\n`;
 }
 
@@ -188,6 +285,11 @@ function envTemplate() {
     "RABBITMQ_USER=app",
     "RABBITMQ_PASSWORD=change-me",
     "AMQP_URL=amqp://app:change-me@rabbitmq:5672"
+  );
+  if (state.appType === "fullstack") lines.push(
+    `FRONTEND_FRAMEWORK=${state.frontendFramework}`,
+    `FRONTEND_PORT=${state.frontendPort}`,
+    `FRONTEND_API_URL=${state.services.has("nginx") ? "/api" : `http://localhost:${state.port}`}`
   );
   return `${lines.join("\n")}\n`;
 }
