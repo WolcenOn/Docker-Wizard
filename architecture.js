@@ -162,4 +162,12 @@ function renderDockerStep() {
     renderSummary();
   });
   document.querySelector("#production").addEventListener("change", (e) => { state.production = e.target.checked; renderSummary(); });
+  const frontendPort = document.querySelector("#frontend-port");
+  if (frontendPort) {
+    frontendPort.addEventListener("input", (e) => {
+      const value = Number(e.target.value);
+      state.frontendPort = Number.isFinite(value) ? Math.max(1, Math.min(65535, value)) : 5173;
+      renderSummary();
+    });
+  }
 }
