@@ -66,3 +66,17 @@ function commandRunbook() {
     ["docker compose down -v", "También elimina los volúmenes. Puede borrar datos persistentes de tus bases de datos.", "danger"]
   ];
 }
+
+function renderCommandCoach() {
+  const commands = [
+    ["Validar configuración", "docker compose config", "Antes de crear contenedores, valida el Compose base y comprueba cómo se resuelven sus variables."],
+    ["Construir la imagen", "docker compose build", "Ejecuta el Dockerfile y aprovecha la caché de capas cuando las entradas no han cambiado."],
+    ["Revisar servicios", "docker compose config --services", "Comprueba qué servicios forman realmente el entorno antes de arrancarlo."],
+    ["Validar modo desarrollo", "docker compose -f compose.yml -f compose.dev.yml config", "Combina el Compose base con el overlay de desarrollo y muestra el resultado efectivo."],
+    ["Preparar y validar", "cp .env.example .env", "Crea primero el archivo local de variables; después sigue el runbook y cambia cualquier credencial change-me."]
+  ];
+  const [title, command, reason] = commands[state.step];
+  commandTitle.textContent = title;
+  terminalCommand.textContent = command;
+  commandReason.textContent = reason;
+}
