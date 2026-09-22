@@ -8,6 +8,7 @@ No requiere build, npm ni dependencias para ejecutar la interfaz: abre `index.ht
 
 - Wizard guiado de 5 pasos.
 - Python, Node.js y Go con varios frameworks.
+- Modo **Full Stack** con React + Vite, Vue + Vite o Svelte + Vite como frontend independiente.
 - PostgreSQL, MySQL, Redis, Nginx, RabbitMQ y MongoDB.
 - Diagrama visual de la arquitectura elegida.
 - Healthchecks para servicios de infraestructura.
@@ -16,6 +17,8 @@ No requiere build, npm ni dependencias para ejecutar la interfaz: abre `index.ht
 - Volúmenes nombrados para datos persistentes.
 - Generación de:
   - `Dockerfile`
+  - `Dockerfile.frontend` cuando se selecciona Full Stack
+  - `PROJECT_LAYOUT.md` para documentar la estructura Full Stack
   - `compose.yml`
   - `compose.dev.yml`
   - `compose.prod.yml`
@@ -94,6 +97,33 @@ docker compose -f compose.yml -f compose.prod.yml config
 
 No pretende sustituir una plataforma de producción completa.
 
+## Full Stack
+
+El modo **Full Stack** mantiene el backend en la raíz del proyecto y añade un proyecto Vite en `frontend/`. De esta forma el modo API existente sigue siendo compatible y el frontend obtiene su propia imagen.
+
+La imagen del frontend es multi-stage:
+
+1. Node instala dependencias con `npm ci`.
+2. Vite ejecuta `npm run build`.
+3. Solo `dist/` pasa a una imagen final Nginx.
+
+El contrato entre frontend y backend es `VITE_API_URL`. Si se selecciona Nginx, su valor recomendado es `/api` y el proxy reenvía esas peticiones al backend. Sin Nginx, el frontend apunta al puerto publicado del backend y este debe permitir el origen web mediante CORS.
+
+La salida Full Stack añade:
+
+```text
+Dockerfile
+Dockerfile.frontend
+compose.yml
+compose.dev.yml
+compose.prod.yml
+.env.example
+PROJECT_LAYOUT.md
+nginx.conf          # si se selecciona Nginx
+```
+
+El puerto web local es configurable desde el wizard; por defecto usa `5173`.
+
 ## Nginx
 
 Cuando se selecciona Nginx, Docker Wizard genera `nginx.conf` y cambia la topología:
@@ -104,8 +134,8 @@ Cliente
    ▼
  Nginx :80
    │
-   ▼
- app:<puerto>
+   ├── /      → frontend:80   (Full Stack)
+   └── /api/  → app:<puerto>
    │
    ├── PostgreSQL / MySQL / MongoDB
    ├── Redis
