@@ -1,4 +1,44 @@
 // Docker Wizard Pro: pantalla final y archivos adicionales.
+function fullStackLayoutTemplate() {
+  const backendManifest = state.runtime === "python"
+    ? "requirements.txt"
+    : state.runtime === "node"
+      ? "package.json + package-lock.json"
+      : "go.mod + go.sum";
+  const frontend = state.frontendFramework === "react" ? "React + Vite" : state.frontendFramework === "vue" ? "Vue + Vite" : "Svelte + Vite";
+  return `# Estructura esperada
+
+Docker Wizard mantiene el backend en la raíz para conservar compatibilidad con el modo API y añade el frontend en una carpeta independiente.
+
+\`\`\`text
+${state.name}/
+├── ${backendManifest}
+├── ...código backend de ${frameworkLabels[state.framework]}
+├── frontend/
+│   ├── package.json
+│   ├── package-lock.json
+│   └── ...código de ${frontend}
+├── Dockerfile
+├── Dockerfile.frontend
+├── compose.yml
+├── compose.dev.yml
+├── compose.prod.yml
+├── .env.example
+├── .dockerignore${state.services.has("nginx") ? "\n└── nginx.conf" : ""}
+\`\`\`
+
+## Contrato frontend → API
+
+El build del frontend recibe VITE_API_URL.
+
+${state.services.has("nginx")
+  ? "Con Nginx usa /api; el proxy elimina ese prefijo antes de enviar la petición al backend."
+  : `Sin Nginx apunta a http://localhost:${state.port}. El backend debe permitir mediante CORS el origen http://localhost:${state.frontendPort}.`}
+
+El proyecto frontend debe incluir un lockfile y un script npm run build que produzca dist/, como las plantillas estándar de Vite.
+`;
+}
+
 function renderGenerateStep() {
   const files = {
     "Dockerfile": dockerfileTemplate(),
@@ -8,6 +48,10 @@ function renderGenerateStep() {
     ".env.example": envTemplate(),
     ".dockerignore": dockerignoreTemplate()
   };
+  if (state.appType === "fullstack") {
+    files["Dockerfile.frontend"] = frontendDockerfileTemplate();
+    files["PROJECT_LAYOUT.md"] = fullStackLayoutTemplate();
+  }
   if (state.services.has("nginx")) files["nginx.conf"] = nginxConfigTemplate();
 
   if (!files[state.previewFile]) state.previewFile = "Dockerfile";
@@ -17,7 +61,7 @@ function renderGenerateStep() {
   stepContent.innerHTML = `
     <h3 class="section-title">Archivos listos. Ahora entiende la arquitectura y cómo operarla.</h3>
     <p class="section-copy">El resultado separa configuración base, ajustes por entorno y secretos. Antes de descargar nada puedes inspeccionar tanto la topología como cada decisión del YAML.</p>
-    ${guide("✓", "Baseline operativo", `Se generará una app ${esc(state.runtime)} / ${esc(frameworkLabels[state.framework])} en el puerto ${state.port}, con healthchecks, redes explícitas y ${state.services.size} servicio(s) auxiliar(es).`, "success")}
+    ${guide("✓", "Baseline operativo", state.appType === "fullstack" ? `Se generarán dos imágenes: backend ${esc(frameworkLabels[state.framework])} y frontend ${esc(state.frontendFramework)} + Vite, con redes explícitas y ${state.services.size} servicio(s) auxiliar(es).` : `Se generará una app ${esc(state.runtime)} / ${esc(frameworkLabels[state.framework])} en el puerto ${state.port}, con healthchecks, redes explícitas y ${state.services.size} servicio(s) auxiliar(es).`, "success")}
 
     ${architectureDiagram()}
 

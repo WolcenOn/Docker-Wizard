@@ -32,6 +32,8 @@ const state = {
   framework: "fastapi",
   port: 8000,
   production: false,
+  frontendFramework: "react",
+  frontendPort: 5173,
   services: new Set(["postgres"]),
   previewFile: "Dockerfile"
 };
@@ -88,6 +90,7 @@ function renderSummary() {
     <div class="summary-row"><span>Proyecto</span><strong>${esc(state.name)}</strong></div>
     <div class="summary-row"><span>Arquitectura</span><strong>${state.appType === "api" ? "API / Backend" : "Full stack"}</strong></div>
     <div class="summary-row"><span>Aplicación</span><strong>${state.runtime === "node" ? "Node.js" : state.runtime[0].toUpperCase() + state.runtime.slice(1)} · ${esc(frameworkLabels[state.framework])}</strong></div>
+    ${state.appType === "fullstack" ? `<div class="summary-row"><span>Frontend</span><strong>${state.frontendFramework === "react" ? "React + Vite" : state.frontendFramework === "vue" ? "Vue + Vite" : "Svelte + Vite"}</strong></div>` : ""}
     <div class="summary-row"><span>Puerto host → contenedor</span><strong>${state.port} → ${state.port}</strong></div>
     <div class="summary-row"><span>Servicios</span><div class="tags">${services.length ? services.map(s => `<span class="tag">${esc(s)}</span>`).join("") : `<span class="tag">ninguno</span>`}</div></div>
     <div class="summary-row"><span>Estrategia</span><strong>${state.production ? "Orientada a producción" : "Desarrollo local"}</strong></div>`;
@@ -177,6 +180,18 @@ function renderTechnologyStep() {
       <div class="field-help">También usamos el framework para proponer el puerto habitual y el comando de arranque.</div>
     </div>
 
+    ${state.appType === "fullstack" ? `
+      <div class="decision-box">
+        <h4>Frontend independiente</h4>
+        <p>El backend conserva el runtime elegido arriba. El frontend tendrá su propia imagen multi-stage: Node compila el proyecto Vite y Nginx sirve únicamente los archivos estáticos resultantes.</p>
+      </div>
+      <div class="option-grid three" style="margin-bottom:20px">
+        ${optionCard("frontendFramework", "react", "React + Vite", "SPA React compilada a dist/ y servida por Nginx.", state.frontendFramework === "react", "Frontend")}
+        ${optionCard("frontendFramework", "vue", "Vue + Vite", "Vue 3 con el mismo pipeline de build reproducible.", state.frontendFramework === "vue", "Frontend")}
+        ${optionCard("frontendFramework", "svelte", "Svelte + Vite", "Svelte en modo SPA con salida estática dist/.", state.frontendFramework === "svelte", "Frontend")}
+      </div>
+      ${guide("/api", "Contrato frontend → backend", "Con Nginx, el frontend puede llamar a /api y el proxy entregará esas peticiones al backend. Sin Nginx se usará la URL directa del backend y tendrás que permitir el origen del frontend mediante CORS.")}
+    ` : ""}
     <div class="decision-box"><h4>Lo que generará el Dockerfile</h4><p><code>FROM</code> elegirá el runtime, <code>WORKDIR</code> fijará una carpeta de trabajo, <code>COPY</code> introducirá tus archivos, <code>RUN</code> instalará o compilará dependencias y <code>CMD</code> definirá el proceso principal del contenedor.</p></div>`;
 
   stepContent.querySelectorAll('input[name="runtime"]').forEach((input) => {
@@ -192,6 +207,13 @@ function renderTechnologyStep() {
     state.framework = e.target.value;
     state.port = defaultPorts[state.framework] || state.port;
     renderSummary();
+  });
+
+  stepContent.querySelectorAll('input[name="frontendFramework"]').forEach((input) => {
+    input.addEventListener("change", (e) => {
+      state.frontendFramework = e.target.value;
+      render();
+    });
   });
 }
 
@@ -464,7 +486,8 @@ function render() {
 function reset() {
   Object.assign(state, {
     step: 0, name: "mi-proyecto", appType: "api", runtime: "python",
-    framework: "fastapi", port: 8000, production: false, previewFile: "Dockerfile"
+    framework: "fastapi", port: 8000, production: false,
+    frontendFramework: "react", frontendPort: 5173, previewFile: "Dockerfile"
   });
   state.services = new Set(["postgres"]);
   render();
